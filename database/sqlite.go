@@ -53,6 +53,7 @@ func OpenSQLiteDatabase(databasePath string) (*SQLiteDatabase, error) {
 		min_read_time INTEGER NOT NULL DEFAULT 0,
 		max_read_time INTEGER NOT NULL DEFAULT 0,
 		modified TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        isvideo INTEGER NOT NULL DEFAULT 0,
 		CONSTRAINT bookmark_PK PRIMARY KEY(id),
 		CONSTRAINT bookmark_url_UNIQUE UNIQUE(url))`)
 
@@ -68,6 +69,18 @@ func OpenSQLiteDatabase(databasePath string) (*SQLiteDatabase, error) {
 		CONSTRAINT bookmark_tag_PK PRIMARY KEY(bookmark_id, tag_id),
 		CONSTRAINT bookmark_id_FK FOREIGN KEY(bookmark_id) REFERENCES bookmark(id),
 		CONSTRAINT tag_id_FK FOREIGN KEY(tag_id) REFERENCES tag(id))`)
+
+	tx.MustExec(`CREATE TABLE IF NOT EXISTS video(
+		id INTEGER NOT NULL,
+		downloaded INTEGER NOT NULL,
+        filename  TEXT NOT NULL,
+		CONSTRAINT video_PK PRIMARY KEY(id))`)
+
+	tx.MustExec(`CREATE TABLE IF NOT EXISTS bookmark_video(
+		bookmark_id INTEGER NOT NULL,
+		video_id INTEGER NOT NULL,
+		CONSTRAINT bookmark_id_FK FOREIGN KEY(bookmark_id) REFERENCES bookmark(id)
+		CONSTRAINT video_id_FK FOREIGN KEY(video_id) REFERENCES video(id))`)
 
 	tx.MustExec(`CREATE VIRTUAL TABLE IF NOT EXISTS bookmark_content USING fts4(title, content, html)`)
 
@@ -112,8 +125,8 @@ func (db *SQLiteDatabase) CreateBookmark(bookmark model.Bookmark) (bookmarkID in
 	// Save article to database
 	res := tx.MustExec(`INSERT INTO bookmark (
 		url, title, image_url, excerpt, author, 
-		min_read_time, max_read_time, modified) 
-		VALUES(?, ?, ?, ?, ?, ?, ?, ?)`,
+		min_read_time, max_read_time, modified,isvideo) 
+		VALUES(?, ?, ?, ?, ?, ?, ?, ?,?)`,
 		bookmark.URL,
 		bookmark.Title,
 		bookmark.ImageURL,
@@ -121,7 +134,8 @@ func (db *SQLiteDatabase) CreateBookmark(bookmark model.Bookmark) (bookmarkID in
 		bookmark.Author,
 		bookmark.MinReadTime,
 		bookmark.MaxReadTime,
-		bookmark.Modified)
+		bookmark.Modified,
+		bookmark.IsVideo)
 
 	// Get last inserted ID
 	bookmarkID, err = res.LastInsertId()
@@ -164,6 +178,54 @@ func (db *SQLiteDatabase) CreateBookmark(bookmark model.Bookmark) (bookmarkID in
 	checkError(err)
 
 	return bookmarkID, err
+}
+
+// CreateVideosaves new video to database. Returns new ID and error if any happened.
+func (db *SQLiteDatabase) CreateVideo(bookmarkID int64, video model.Video) (videoID int64, err error) {
+
+	// Prepare transaction
+	tx, err := db.Beginx()
+	if err != nil {
+		return -1, err
+	}
+
+	// Make sure to rollback if panic ever happened
+	defer func() {
+		if r := recover(); r != nil {
+			panicErr, _ := r.(error)
+			tx.Rollback()
+
+			videoID = -1
+			err = panicErr
+		}
+	}()
+
+	// Save article to database
+	res := tx.MustExec(`INSERT INTO video (
+		downloaded,filename)
+		VALUES(?, ?)`,
+		video.Downloaded,
+		video.Filename)
+
+	// Get last inserted ID
+	videoID, err = res.LastInsertId()
+	checkError(err)
+
+	res = tx.MustExec(`INSERT into video(
+    downloaded,filename) VALUES (?,?)`,
+		video.Downloaded, video.Filename)
+	videoID, err = res.LastInsertId()
+	checkError(err)
+	stmtInsertVideoBookmark, err := tx.Preparex(`INSERT OR IGNORE INTO bookmark_video (video_id, bookmark_id) VALUES (?, ?)`)
+	stmtInsertVideoBookmark.MustExec(videoID, bookmarkID)
+	checkError(err)
+
+	// Commit transaction
+	err = tx.Commit()
+	checkError(err)
+
+	return videoID, err
+
 }
 
 // GetBookmarks fetch list of bookmarks based on submitted indices.

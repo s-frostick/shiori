@@ -22,6 +22,15 @@ type Bookmark struct {
 	Content     string `db:"content"       json:"-"`
 	HTML        string `db:"html"          json:"-"`
 	Tags        []Tag  `json:"tags"`
+    IsVideo     bool   `db:"isvideo"       json:"isvideo"`
+    Downloaded  bool   `db:"downloaded"  json:"downloaded"`
+}
+
+
+type Video struct {
+   ID       int64  `db:"id"     json:"id"`
+   Downloaded bool `db:"downloaded" json:"downloaded"`
+   Filename  string `db:"filename" json:"filename"`
 }
 
 // Account is account for accessing bookmarks from web interface
