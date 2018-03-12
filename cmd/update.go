@@ -162,7 +162,9 @@ func updateBookmarks(indices []string, base model.Bookmark, offline, overwrite b
 				book.MinReadTime = article.Meta.MinReadTime
 				book.MaxReadTime = article.Meta.MaxReadTime
 				book.Content = article.Content
-				book.HTML = article.RawContent
+                if !book.IsVideo  {
+				    book.HTML = article.RawContent
+                }
 
 				bookmarks[pos] = book
 			}(i, book)
