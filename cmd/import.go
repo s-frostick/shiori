@@ -30,7 +30,7 @@ var (
 				generateTag = submitGenerateTag == "y"
 			}
 
-			err := importBookmarks(args[0], generateTag,shaarli)
+			err := importBookmarks(args[0], generateTag, shaarli)
 			if err != nil {
 				cError.Println(err)
 				return
@@ -41,7 +41,7 @@ var (
 
 func init() {
 	importCmd.Flags().BoolP("generate-tag", "t", false, "Auto generate tag from bookmark's category")
-    importCmd.Flags().BoolP("shaarli","s",false,"Import tags from shaarli, remove extra hash tag")
+	importCmd.Flags().BoolP("shaarli", "s", false, "Import tags from shaarli, remove extra hash tag")
 	rootCmd.AddCommand(importCmd)
 }
 
@@ -78,10 +78,12 @@ func importBookmarks(pth string, generateTag bool, shaarli bool) error {
 		tags := []model.Tag{}
 		for _, strTag := range strings.Split(strTags, ",") {
 			if strTag != "" {
-                var newTag string
-                if shaarli {
-                    newTag = strings.Trim(strTag,"#")
-                }
+				var newTag string
+				if shaarli {
+					newTag = strings.Trim(strTag, "#")
+				} else {
+					newTag = strTag
+				}
 				tags = append(tags, model.Tag{Name: newTag})
 			}
 		}
