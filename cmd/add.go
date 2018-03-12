@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	nurl "net/url"
-	"strings"
-	"time"
-
 	"github.com/RadhiFadlillah/go-readability"
 	"github.com/RadhiFadlillah/shiori/model"
+	"github.com/rylio/ytdl"
 	"github.com/spf13/cobra"
+	nurl "net/url"
+	"os"
+	"strings"
+	"time"
 )
 
 var (
@@ -101,6 +102,22 @@ func addBookmark(base model.Bookmark, offline bool) (book model.Bookmark, err er
 
 	// Save to database
 	book.ID, err = DB.CreateBookmark(book)
+
+	if strings.Contains(book.URL, "youtube.com") {
+		video := model.Video{}
+
+		book.IsVideo = true
+		filename, err := youtubedl(book.URL)
+
+		if err != nil {
+			return book, err
+		}
+
+		video.Filename = filename
+		video.Downloaded = true
+		video.ID, err = DB.CreateVideo(book.ID, video)
+	}
+
 	return book, err
 }
 
@@ -120,4 +137,27 @@ func clearUTMParams(url *nurl.URL) (string, error) {
 
 	url.RawQuery = newQuery.Encode()
 	return url.String(), nil
+}
+
+func youtubedl(url string) (filename string, err error) {
+
+	vid, err := ytdl.GetVideoInfo(url)
+	cIndex.Println("Link is video")
+	cTitle.Println("Downloading " + vid.Title + "...")
+	filename = vid.Title + ".mp4"
+
+	formatsFound := vid.Formats.Best(ytdl.FormatResolutionKey)
+	if len(formatsFound) > 0 {
+		file, err := os.Create(filename)
+		if err != nil {
+			return "", err
+		}
+		defer file.Close()
+		err = vid.Download(formatsFound[0], file)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return filename, err
 }

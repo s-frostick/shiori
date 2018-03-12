@@ -11,6 +11,9 @@ type Database interface {
 	// SaveBookmark saves new bookmark to database.
 	CreateBookmark(bookmark model.Bookmark) (int64, error)
 
+	//CreateVideo save new video to database
+	CreateVideo(bookmarkID int64, video model.Video) (int64, error)
+
 	// GetBookmarks fetch list of bookmarks based on submitted indices.
 	GetBookmarks(withContent bool, indices ...string) ([]model.Bookmark, error)
 
