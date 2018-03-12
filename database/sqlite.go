@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/s-frostick/shiori/model"
 	"github.com/jmoiron/sqlx"
+	"github.com/s-frostick/shiori/model"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -278,7 +278,7 @@ func (db *SQLiteDatabase) GetBookmarks(withContent bool, indices ...string) ([]m
 	// Fetch bookmarks
 	query := `SELECT id, 
 		url, title, image_url, excerpt, author, 
-		min_read_time, max_read_time, modified
+		min_read_time, max_read_time, modified, isvideo
 		FROM bookmark` + whereClause
 
 	bookmarks := []model.Bookmark{}
@@ -494,7 +494,7 @@ func (db *SQLiteDatabase) UpdateBookmarks(bookmarks []model.Bookmark) (result []
 	// Prepare statement
 	stmtUpdateBookmark, err := tx.Preparex(`UPDATE bookmark SET
 		url = ?, title = ?, image_url = ?, excerpt = ?, author = ?,
-		min_read_time = ?, max_read_time = ?, modified = ? WHERE id = ?`)
+		min_read_time = ?, max_read_time = ?, modified = ?, isvideo = ? WHERE id = ?`)
 	checkError(err)
 
 	stmtUpdateBookmarkContent, err := tx.Preparex(`UPDATE bookmark_content SET
@@ -524,6 +524,7 @@ func (db *SQLiteDatabase) UpdateBookmarks(bookmarks []model.Bookmark) (result []
 			book.MinReadTime,
 			book.MaxReadTime,
 			book.Modified,
+			book.IsVideo,
 			book.ID)
 
 		stmtUpdateBookmarkContent.MustExec(

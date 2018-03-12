@@ -141,26 +141,34 @@ func clearUTMParams(url *nurl.URL) (string, error) {
 
 func youtubedl(url string) (filename string, err error) {
 
-    if _, err := os.Stat("videos"); os.IsNotExist(err){
-        err = os.Mkdir("videos",0755)
-        if err != nil {
-            return "", err
-        }
-    }
+	if _, err := os.Stat("videos"); os.IsNotExist(err) {
+		err = os.Mkdir("videos", 0755)
+		if err != nil {
+			return "", err
+		}
+	}
 
 	vid, err := ytdl.GetVideoInfo(url)
 	cIndex.Println("Link is video")
 	cTitle.Println("Downloading " + vid.Title + "...")
 	filename = vid.Title + ".mp4"
 
-	formatsFound := vid.Formats.Best(ytdl.FormatResolutionKey)
-	if len(formatsFound) > 0 {
-		file, err := os.Create("videos/"+filename)
+	chosenFormats := ytdl.FormatList{}
+
+	for _, format := range vid.Formats {
+		if format.ValueForKey(ytdl.FormatAudioEncodingKey) != "" && format.ValueForKey(ytdl.FormatExtensionKey) == "mp4" {
+			chosenFormats = append(chosenFormats, format)
+		}
+	}
+
+	bestFormat := chosenFormats.Best(ytdl.FormatResolutionKey)
+	if len(bestFormat) > 0 {
+		file, err := os.Create("videos/" + filename)
 		if err != nil {
 			return "", err
 		}
 		defer file.Close()
-		err = vid.Download(formatsFound[0], file)
+		err = vid.Download(bestFormat[0], file)
 		if err != nil {
 			return "", err
 		}

@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/s-frostick/shiori/assets"
-	"github.com/s-frostick/shiori/model"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/julienschmidt/httprouter"
+	"github.com/s-frostick/shiori/assets"
+	"github.com/s-frostick/shiori/model"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/bcrypt"
@@ -61,6 +61,8 @@ var (
 			router.GET("/res/*filepath", serveFiles)
 			router.GET("/css/*filepath", serveFiles)
 			router.GET("/webfonts/*filepath", serveFiles)
+
+			router.ServeFiles("/videos/*filepath", http.Dir("videos"))
 
 			router.GET("/", serveIndexPage)
 			router.GET("/login", serveLoginPage)
