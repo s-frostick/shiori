@@ -211,11 +211,6 @@ func (db *SQLiteDatabase) CreateVideo(bookmarkID int64, video model.Video) (vide
 	videoID, err = res.LastInsertId()
 	checkError(err)
 
-	res = tx.MustExec(`INSERT into video(
-    downloaded,filename) VALUES (?,?)`,
-		video.Downloaded, video.Filename)
-	videoID, err = res.LastInsertId()
-	checkError(err)
 	stmtInsertVideoBookmark, err := tx.Preparex(`INSERT OR IGNORE INTO bookmark_video (video_id, bookmark_id) VALUES (?, ?)`)
 	stmtInsertVideoBookmark.MustExec(videoID, bookmarkID)
 	checkError(err)
@@ -389,10 +384,12 @@ func (db *SQLiteDatabase) DeleteBookmarks(indices ...string) (err error) {
 	// Delete bookmarks
 	whereTagClause := strings.Replace(whereClause, "id", "bookmark_id", 1)
 	whereContentClause := strings.Replace(whereClause, "id", "docid", 1)
+	whereVideoClause := strings.Replace(whereClause, "id", "bookmark_id", 1)
 
 	tx.MustExec("DELETE FROM bookmark "+whereClause, args...)
 	tx.MustExec("DELETE FROM bookmark_tag "+whereTagClause, args...)
 	tx.MustExec("DELETE FROM bookmark_content "+whereContentClause, args...)
+	tx.MustExec("DELETE FROM bookmark_video "+whereVideoClause, args...)
 
 	// Commit transaction
 	err = tx.Commit()

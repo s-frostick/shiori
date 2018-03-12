@@ -108,27 +108,20 @@ func addBookmark(base model.Bookmark, offline bool) (book model.Bookmark, err er
 
 		book.IsVideo = true
 		filename, err := youtubedl(book.URL)
-
 		if err != nil {
 			return book, err
 		}
-          
-        video.Filename = filename
-        video.Downloaded = true
-        video.ID, err = DB.CreateVideo(book.ID, video)
-        book.IsVideo = true
 
-        book.HTML = "<video controls>" +
-                        "<source src=\"../videos/"+video.Filename+"\" type=\"video/mp4\">" +
-                        "Your browser does not support the video tag.</video>"
+		book.HTML = "<video controls>" +
+			"<source src=\"../videos/" + video.Filename + "\" type=\"video/mp4\">" +
+			"Your browser does not support the video tag.</video>"
 
+		books := []model.Bookmark{book}
+		_, err = DB.UpdateBookmarks(books)
 
-        books := []model.Bookmark{book}
-        _,err = DB.UpdateBookmarks(books)
-
-        video.Filename = filename
-        video.Downloaded = true
-        video.ID, err = DB.CreateVideo(book.ID, video)
+		video.Filename = filename
+		video.Downloaded = true
+		video.ID, err = DB.CreateVideo(book.ID, video)
 
 	}
 
@@ -154,6 +147,7 @@ func clearUTMParams(url *nurl.URL) (string, error) {
 }
 
 func youtubedl(url string) (filename string, err error) {
+    cIndex.Println("Link is video")
 
 	if _, err := os.Stat("videos"); os.IsNotExist(err) {
 		err = os.Mkdir("videos", 0755)
@@ -163,9 +157,20 @@ func youtubedl(url string) (filename string, err error) {
 	}
 
 	vid, err := ytdl.GetVideoInfo(url)
-	cIndex.Println("Link is video")
-	cTitle.Println("Downloading " + vid.Title + "...")
+	if err != nil {
+		return "", err
+	}
 	filename = vid.Title + ".mp4"
+   
+
+    //if file already exists do not download it again 
+    if _, err := os.Stat("videos/"+filename); err == nil{
+	    cError.Println(vid.Title + "already downloaded")
+    
+        return filename, nil
+    }
+	
+	cTitle.Println("Downloading " + vid.Title + "...")
 
 	chosenFormats := ytdl.FormatList{}
 
