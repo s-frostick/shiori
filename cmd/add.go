@@ -111,6 +111,9 @@ func addBookmark(base model.Bookmark, offline bool) (book model.Bookmark, err er
 		if err != nil {
 			return book, err
 		}
+		
+        video.Filename = filename
+		video.Downloaded = true
 
 		book.HTML = "<video controls>" +
 			"<source src=\"../videos/" + video.Filename + "\" type=\"video/mp4\">" +
@@ -119,8 +122,6 @@ func addBookmark(base model.Bookmark, offline bool) (book model.Bookmark, err er
 		books := []model.Bookmark{book}
 		_, err = DB.UpdateBookmarks(books)
 
-		video.Filename = filename
-		video.Downloaded = true
 		video.ID, err = DB.CreateVideo(book.ID, video)
 
 	}
