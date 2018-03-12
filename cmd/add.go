@@ -112,10 +112,24 @@ func addBookmark(base model.Bookmark, offline bool) (book model.Bookmark, err er
 		if err != nil {
 			return book, err
 		}
+          
+        video.Filename = filename
+        video.Downloaded = true
+        video.ID, err = DB.CreateVideo(book.ID, video)
+        book.IsVideo = true
 
-		video.Filename = filename
-		video.Downloaded = true
-		video.ID, err = DB.CreateVideo(book.ID, video)
+        book.HTML = "<video controls>" +
+                        "<source src=\"../videos/"+video.Filename+"\" type=\"video/mp4\">" +
+                        "Your browser does not support the video tag.</video>"
+
+
+        books := []model.Bookmark{book}
+        _,err = DB.UpdateBookmarks(books)
+
+        video.Filename = filename
+        video.Downloaded = true
+        video.ID, err = DB.CreateVideo(book.ID, video)
+
 	}
 
 	return book, err
