@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/RadhiFadlillah/go-readability"
 	"github.com/s-frostick/shiori/model"
-	"github.com/rylio/ytdl"
+	"github.com/s-frostick/ytdl"
 	"github.com/spf13/cobra"
 	nurl "net/url"
 	"os"
