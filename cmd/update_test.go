@@ -5,17 +5,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/RadhiFadlillah/shiori/model"
+	"github.com/s-frostick/shiori/model"
 )
 
 func TestUpdateBookMark(t *testing.T) {
 	testbks := []model.Bookmark{
 		{
-			URL:   "https://github.com/RadhiFadlillah/shiori/releases",
+			URL:   "https://github.com/s-frostick/shiori/releases",
 			Title: "Releases",
 		},
 		{
-			URL:   "https://github.com/RadhiFadlillah/shiori/projects",
+			URL:   "https://github.com/s-frostick/shiori/projects",
 			Title: "Projects",
 		},
 	}

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/RadhiFadlillah/shiori/model"
+	"github.com/s-frostick/shiori/model"
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +19,9 @@ var (
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			generateTag := cmd.Flags().Changed("generate-tag")
+
+			shaarli, _ := cmd.Flags().GetBool("shaarli")
+
 			if !generateTag {
 				var submitGenerateTag string
 				fmt.Print("Add parents folder as tag? (y/n): ")
@@ -27,7 +30,7 @@ var (
 				generateTag = submitGenerateTag == "y"
 			}
 
-			err := importBookmarks(args[0], generateTag)
+			err := importBookmarks(args[0], generateTag,shaarli)
 			if err != nil {
 				cError.Println(err)
 				return
@@ -38,10 +41,11 @@ var (
 
 func init() {
 	importCmd.Flags().BoolP("generate-tag", "t", false, "Auto generate tag from bookmark's category")
+    importCmd.Flags().BoolP("shaarli","s",false,"Import tags from shaarli, remove extra hash tag")
 	rootCmd.AddCommand(importCmd)
 }
 
-func importBookmarks(pth string, generateTag bool) error {
+func importBookmarks(pth string, generateTag bool, shaarli bool) error {
 	// Open file
 	srcFile, err := os.Open(pth)
 	if err != nil {
@@ -74,7 +78,11 @@ func importBookmarks(pth string, generateTag bool) error {
 		tags := []model.Tag{}
 		for _, strTag := range strings.Split(strTags, ",") {
 			if strTag != "" {
-				tags = append(tags, model.Tag{Name: strTag})
+                var newTag string
+                if shaarli {
+                    newTag = strings.Trim(strTag,"#")
+                }
+				tags = append(tags, model.Tag{Name: newTag})
 			}
 		}
 

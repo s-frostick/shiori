@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/RadhiFadlillah/shiori/model"
+	"github.com/s-frostick/shiori/model"
 )
 
 func TestAddBookMark(t *testing.T) {
@@ -19,20 +19,20 @@ func TestAddBookMark(t *testing.T) {
 		},
 		{
 			model.Bookmark{
-				URL: "https://github.com/RadhiFadlillah/shiori",
+				URL: "https://github.com/s-frostick/shiori",
 			},
 			true, "Title must not be empty",
 		},
 		{
 			model.Bookmark{
-				URL:   "https://github.com/RadhiFadlillah/shiori",
+				URL:   "https://github.com/s-frostick/shiori",
 				Title: "Shiori",
 			},
 			true, "",
 		},
 		{
 			model.Bookmark{
-				URL: "https://github.com/RadhiFadlillah/shiori/issues",
+				URL: "https://github.com/s-frostick/shiori/issues",
 			},
 			false, "",
 		},

@@ -6,8 +6,8 @@ import (
 	"os/user"
 	fp "path/filepath"
 
-	"github.com/RadhiFadlillah/shiori/cmd"
-	db "github.com/RadhiFadlillah/shiori/database"
+	"github.com/s-frostick/shiori/cmd"
+	db "github.com/s-frostick/shiori/database"
 	_ "github.com/mattn/go-sqlite3"
 )
 

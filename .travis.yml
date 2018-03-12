@@ -13,7 +13,7 @@ before_install:
   - go get github.com/inconshreveable/mousetrap # needed for windows builds
 
 install:
-  - go get github.com/RadhiFadlillah/shiori
+  - go get github.com/s-frostick/shiori
 
 script:
   - go get -t -v ./...

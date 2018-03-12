@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	db "github.com/RadhiFadlillah/shiori/database"
+	db "github.com/s-frostick/shiori/database"
 	_ "github.com/mattn/go-sqlite3"
 )
 

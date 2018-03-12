@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/RadhiFadlillah/shiori/database"
+	"github.com/s-frostick/shiori/database"
 	"github.com/spf13/cobra"
 )
 

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/RadhiFadlillah/go-readability"
-	"github.com/RadhiFadlillah/shiori/model"
+	"github.com/s-frostick/shiori/model"
 	"github.com/gosuri/uiprogress"
 	"github.com/spf13/cobra"
 )
